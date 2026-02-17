@@ -1,0 +1,24 @@
+[2026-02-17 16:06:43] DllNotFoundException: Unable to load DLL 'e_sqlite3' or one of its dependencies: The specified module could not be found. (0x8007007E)
+   at System.Data.SQLite.UnsafeNativeMethods.sqlite3_config_none(SQLiteConfigOpsEnum op)
+   at System.Data.SQLite.UnsafeNativeMethods.sqlite3_config_none(SQLiteConfigOpsEnum op)
+   at System.Data.SQLite.SQLite3.StaticIsInitialized()
+   at System.Data.SQLite.SQLiteLog.PrivateInitialize(String className)
+   at System.Data.SQLite.SQLiteLog.Initialize(String className)
+   at System.Data.SQLite.SQLiteConnection..ctor(String connectionString, Boolean parseViaFramework)
+   at System.Data.SQLite.SQLiteConnection..ctor(String connectionString)
+   at PersonalFinanceTracker.Data.DatabaseHelper.InitializeDatabase() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\Data\DatabaseHelper.cs:line 50
+   at PersonalFinanceTracker.Data.DatabaseHelper..ctor() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\Data\DatabaseHelper.cs:line 42
+   at PersonalFinanceTracker.MainWindow..ctor() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\MainWindow.xaml.cs:line 18
+
+[2026-02-17 16:07:44] DllNotFoundException: Unable to load DLL 'e_sqlite3' or one of its dependencies: The specified module could not be found. (0x8007007E)
+   at System.Data.SQLite.UnsafeNativeMethods.sqlite3_config_none(SQLiteConfigOpsEnum op)
+   at System.Data.SQLite.UnsafeNativeMethods.sqlite3_config_none(SQLiteConfigOpsEnum op)
+   at System.Data.SQLite.SQLite3.StaticIsInitialized()
+   at System.Data.SQLite.SQLiteLog.PrivateInitialize(String className)
+   at System.Data.SQLite.SQLiteLog.Initialize(String className)
+   at System.Data.SQLite.SQLiteConnection..ctor(String connectionString, Boolean parseViaFramework)
+   at System.Data.SQLite.SQLiteConnection..ctor(String connectionString)
+   at PersonalFinanceTracker.Data.DatabaseHelper.InitializeDatabase() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\Data\DatabaseHelper.cs:line 50
+   at PersonalFinanceTracker.Data.DatabaseHelper..ctor() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\Data\DatabaseHelper.cs:line 42
+   at PersonalFinanceTracker.MainWindow..ctor() in C:\Github-Projects\chinmay005-Personal-Finance-Tracker-WPF\PersonalFinanceTracker\MainWindow.xaml.cs:line 18
+
