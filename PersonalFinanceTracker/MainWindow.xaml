@@ -93,26 +93,13 @@
                     <StackPanel Margin="20">
                         <TextBlock Text="Add New Transaction" FontSize="16" FontWeight="Bold" Foreground="#212121" Margin="0,0,0,15"/>
                         
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="180"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Date Field -->
-                            <TextBlock Grid.Column="0" Text="📅 Date:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold" Foreground="#212121"/>
-                            <DatePicker x:Name="DateInput" Grid.Column="1" ToolTip="Select transaction date"/>
-
-                            <!-- Category Field -->
-                            <TextBlock Grid.Column="2" Text="📌 Category:" VerticalAlignment="Center" Margin="15,0,10,0" FontWeight="Bold" Foreground="#212121"/>
-                            <ComboBox x:Name="CategoryInput" Grid.Column="3" ToolTip="Choose a transaction category">
+                        <!-- First Row -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBlock Text="📅 Date:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold" Foreground="#212121" Width="50"/>
+                            <DatePicker x:Name="DateInput" Width="140" VerticalAlignment="Center" ToolTip="Select transaction date"/>
+                            
+                            <TextBlock Text="📌 Category:" VerticalAlignment="Center" Margin="20,0,10,0" FontWeight="Bold" Foreground="#212121" Width="70"/>
+                            <ComboBox x:Name="CategoryInput" Width="140" VerticalAlignment="Center" ToolTip="Choose a transaction category">
                                 <ComboBoxItem Content="Salary" IsSelected="True"/>
                                 <ComboBoxItem Content="Bonus"/>
                                 <ComboBoxItem Content="Investment"/>
@@ -127,18 +114,18 @@
                                 <ComboBoxItem Content="Healthcare"/>
                                 <ComboBoxItem Content="Other"/>
                             </ComboBox>
+                        </StackPanel>
 
-                            <!-- Amount Field -->
-                            <TextBlock Grid.Column="4" Text="💵 Amount:" VerticalAlignment="Center" Margin="15,0,10,0" FontWeight="Bold" Foreground="#212121"/>
-                            <TextBox x:Name="AmountInput" Grid.Column="5" ToolTip="Enter the transaction amount"/>
-
-                            <!-- Notes Field -->
-                            <TextBlock Grid.Column="6" Text="📝 Notes:" VerticalAlignment="Center" Margin="15,0,10,0" FontWeight="Bold" Foreground="#212121"/>
-                            <TextBox x:Name="NotesInput" Grid.Column="7" ToolTip="Optional: Add transaction notes"/>
-
-                            <!-- Add Button -->
-                            <Button x:Name="AddButton" Grid.Column="8" Content="➕ Add" Click="AddTransaction_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="15,0,0,0" ToolTip="Click to add the transaction"/>
-                        </Grid>
+                        <!-- Second Row -->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💵 Amount:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="Bold" Foreground="#212121" Width="70"/>
+                            <TextBox x:Name="AmountInput" Width="100" Padding="8" VerticalAlignment="Center" ToolTip="Enter the transaction amount"/>
+                            
+                            <TextBlock Text="📝 Notes:" VerticalAlignment="Center" Margin="20,0,10,0" FontWeight="Bold" Foreground="#212121" Width="50"/>
+                            <TextBox x:Name="NotesInput" Width="200" Padding="8" VerticalAlignment="Center" ToolTip="Optional: Add transaction notes"/>
+                            
+                            <Button x:Name="AddButton" Content="➕ Add Transaction" Click="AddTransaction_Click" Style="{StaticResource PrimaryButtonStyle}" Margin="20,0,0,0" Padding="15,8" VerticalAlignment="Center" ToolTip="Click to add the transaction"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -146,10 +133,43 @@
                 <Border Background="White" Margin="20,10,20,10" CornerRadius="8" BorderThickness="1" BorderBrush="#E0E0E0">
                     <StackPanel Margin="20">
                         <TextBlock Text="Recent Transactions" FontSize="16" FontWeight="Bold" Foreground="#212121" Margin="0,0,0,15"/>
-                        <DataGrid x:Name="TransactionsGrid" AutoGenerateColumns="True" CanUserAddRows="False" IsReadOnly="True" 
+                        <DataGrid x:Name="TransactionsGrid" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="False"
                                   GridLinesVisibility="Horizontal" BorderThickness="0" BorderBrush="Transparent" 
                                   RowStyle="{StaticResource {x:Type DataGridRow}}" AlternationCount="2"
-                                  ColumnHeaderStyle="{StaticResource {x:Type DataGridColumnHeader}}" Height="300"/>
+                                  ColumnHeaderStyle="{StaticResource {x:Type DataGridColumnHeader}}" Height="280">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="40" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=yyyy-MM-dd}" Width="100" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120" IsReadOnly="True"/>
+                                <DataGridTemplateColumn Header="Amount" Width="100" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Amount, StringFormat='₹ {0:N2}'}" Padding="5"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="*" IsReadOnly="True"/>
+                                <DataGridTemplateColumn Header="Actions" Width="130" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="✏️ Edit" Click="EditTransaction_Click" Padding="8,4" Margin="2" Background="#2196F3" Foreground="White" FontSize="10" Cursor="Hand"/>
+                                                <Button Content="🗑️ Delete" Click="DeleteTransaction_Click" Padding="8,4" Margin="2" Background="#F44336" Foreground="White" FontSize="10" Cursor="Hand"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Transaction Log Section -->
+                <Border Background="White" Margin="20,10,20,10" CornerRadius="8" BorderThickness="1" BorderBrush="#E0E0E0">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="📋 Transaction Log" FontSize="16" FontWeight="Bold" Foreground="#212121" Margin="0,0,0,10"/>
+                        <TextBox x:Name="LogTextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" 
+                                 Height="120" Background="#F5F5F5" Foreground="#212121" FontFamily="Consolas" FontSize="11" Padding="10"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -168,7 +188,7 @@
                 <Border Grid.Column="0" Background="#E8F5E9" BorderThickness="1" BorderBrush="#4CAF50" CornerRadius="6" Margin="0,0,10,0" Padding="20">
                     <StackPanel>
                         <TextBlock Text="💚 Total Income" FontSize="12" FontWeight="Bold" Foreground="#2E7D32"/>
-                        <TextBlock x:Name="IncomeLabel" Text="$0.00" FontSize="24" FontWeight="Bold" Foreground="#4CAF50" Margin="0,5,0,0"/>
+                        <TextBlock x:Name="IncomeLabel" Text="₹0.00" FontSize="24" FontWeight="Bold" Foreground="#4CAF50" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -176,7 +196,7 @@
                 <Border Grid.Column="1" Background="#FFEBEE" BorderThickness="1" BorderBrush="#F44336" CornerRadius="6" Margin="10,0,10,0" Padding="20">
                     <StackPanel>
                         <TextBlock Text="❤️ Total Expenses" FontSize="12" FontWeight="Bold" Foreground="#C62828"/>
-                        <TextBlock x:Name="ExpenseLabel" Text="$0.00" FontSize="24" FontWeight="Bold" Foreground="#F44336" Margin="0,5,0,0"/>
+                        <TextBlock x:Name="ExpenseLabel" Text="₹0.00" FontSize="24" FontWeight="Bold" Foreground="#F44336" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
 
@@ -184,7 +204,7 @@
                 <Border Grid.Column="2" Background="#E3F2FD" BorderThickness="1" BorderBrush="#2196F3" CornerRadius="6" Margin="10,0,0,0" Padding="20">
                     <StackPanel>
                         <TextBlock Text="💙 Balance" FontSize="12" FontWeight="Bold" Foreground="#1565C0"/>
-                        <TextBlock x:Name="BalanceLabel" Text="$0.00" FontSize="24" FontWeight="Bold" Foreground="#2196F3" Margin="0,5,0,0"/>
+                        <TextBlock x:Name="BalanceLabel" Text="₹0.00" FontSize="24" FontWeight="Bold" Foreground="#2196F3" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Border>
             </Grid>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using PersonalFinanceTracker.Data;
 
 namespace PersonalFinanceTracker
@@ -9,14 +11,20 @@ namespace PersonalFinanceTracker
     {
         private DatabaseHelper? db;
         private const string LogFile = "logs.txt";
+        private int? editingTransactionId = null;
 
         public MainWindow()
         {
             InitializeComponent();
             try
             {
+                // Initialize DatePicker and ComboBox
+                DateInput.SelectedDate = DateTime.Now;
+                CategoryInput.SelectedIndex = 0;
+                
                 db = new DatabaseHelper();
                 LoadData();
+                AddLog("✅ Application started successfully");
             }
             catch (Exception ex)
             {
@@ -31,7 +39,7 @@ namespace PersonalFinanceTracker
             {
                 if (db == null)
                 {
-                    MessageBox.Show("Database not initialized.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    AddLog("❌ Error: Database not initialized");
                     return;
                 }
 
@@ -40,25 +48,89 @@ namespace PersonalFinanceTracker
                     return;
 
                 var date = DateInput.SelectedDate ?? DateTime.Now;
-                var category = (CategoryInput.SelectedItem as System.Windows.Controls.ComboBoxItem)?.Content.ToString() ?? "Other";
+                var category = (CategoryInput.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Other";
                 var amount = decimal.Parse(AmountInput.Text.Trim());
                 var notes = NotesInput.Text.Trim();
 
-                db.AddTransaction(date, category, amount, notes);
+                if (editingTransactionId.HasValue)
+                {
+                    // Update existing transaction
+                    db.UpdateTransaction(editingTransactionId.Value, date, category, amount, notes);
+                    AddLog($"✏️ Updated [{editingTransactionId.Value}] {date:yyyy-MM-dd} | {category} | ₹{amount:F2} | {notes}");
+                    editingTransactionId = null;
+                }
+                else
+                {
+                    // Add new transaction
+                    db.AddTransaction(date, category, amount, notes);
+                    AddLog($"✅ Added | {date:yyyy-MM-dd} | {category} | ₹{amount:F2} | {notes}");
+                }
                 
                 // Clear inputs on success
                 DateInput.SelectedDate = DateTime.Now;
                 CategoryInput.SelectedIndex = 0;
                 AmountInput.Text = string.Empty;
                 NotesInput.Text = string.Empty;
+                AddButton.Content = "➕ Add Transaction";
 
                 LoadData();
-                MessageBox.Show("Transaction added successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogError(ex);
-                MessageBox.Show("Error saving transaction. Please check your input and try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                AddLog($"❌ Error: {ex.Message}");
+            }
+        }
+
+        private void EditTransaction_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is Button button && button.DataContext is Transaction transaction)
+                {
+                    // Populate form with transaction data
+                    DateInput.SelectedDate = transaction.Date;
+                    CategoryInput.SelectedItem = CategoryInput.Items.Cast<ComboBoxItem>()
+                        .FirstOrDefault(item => item.Content.ToString() == transaction.Category) ?? CategoryInput.Items[0];
+                    AmountInput.Text = transaction.Amount.ToString();
+                    NotesInput.Text = transaction.Notes;
+                    
+                    editingTransactionId = transaction.Id;
+                    AddButton.Content = "💾 Update Transaction";
+                    AddLog($"📝 Editing transaction [{transaction.Id}] - Make changes and click Update");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                AddLog($"❌ Error editing transaction: {ex.Message}");
+            }
+        }
+
+        private void DeleteTransaction_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is Button button && button.DataContext is Transaction transaction && db != null)
+                {
+                    MessageBoxResult result = MessageBox.Show(
+                        $"Are you sure you want to delete this transaction?\n\nDate: {transaction.Date:yyyy-MM-dd}\nCategory: {transaction.Category}\nAmount: ₹{transaction.Amount:F2}",
+                        "Delete Transaction",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        db.DeleteTransaction(transaction.Id);
+                        AddLog($"🗑️ Deleted [{transaction.Id}] {transaction.Date:yyyy-MM-dd} | {transaction.Category} | ₹{transaction.Amount:F2}");
+                        LoadData();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                AddLog($"❌ Error deleting transaction: {ex.Message}");
             }
         }
 
@@ -67,7 +139,7 @@ namespace PersonalFinanceTracker
             // Validate date
             if (DateInput.SelectedDate == null)
             {
-                MessageBox.Show("Please select a valid date.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AddLog("⚠️ Validation: Please select a valid date");
                 DateInput.Focus();
                 return false;
             }
@@ -75,7 +147,7 @@ namespace PersonalFinanceTracker
             // Validate category
             if (CategoryInput.SelectedItem == null)
             {
-                MessageBox.Show("Please select a category.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AddLog("⚠️ Validation: Please select a category");
                 CategoryInput.Focus();
                 return false;
             }
@@ -84,21 +156,21 @@ namespace PersonalFinanceTracker
             var amountText = AmountInput.Text.Trim();
             if (string.IsNullOrEmpty(amountText))
             {
-                MessageBox.Show("Please enter an amount.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AddLog("⚠️ Validation: Please enter an amount");
                 AmountInput.Focus();
                 return false;
             }
 
             if (!decimal.TryParse(amountText, out decimal amount))
             {
-                MessageBox.Show("Please enter a valid number for the amount.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AddLog("⚠️ Validation: Please enter a valid number for amount");
                 AmountInput.Focus();
                 return false;
             }
 
             if (amount <= 0)
             {
-                MessageBox.Show("Please enter a valid amount (must be greater than 0).", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                AddLog("⚠️ Validation: Amount must be greater than 0");
                 AmountInput.Focus();
                 return false;
             }
@@ -117,14 +189,28 @@ namespace PersonalFinanceTracker
                 TransactionsGrid.ItemsSource = transactions;
                 
                 var summary = db.GetSummary();
-                IncomeLabel.Text = $"Income: ${summary.TotalIncome:F2}";
-                ExpenseLabel.Text = $"Expenses: ${summary.TotalExpenses:F2}";
-                BalanceLabel.Text = $"Balance: ${summary.Balance:F2}";
+                IncomeLabel.Text = $"Income: ₹{summary.TotalIncome:F2}";
+                ExpenseLabel.Text = $"Expenses: ₹{summary.TotalExpenses:F2}";
+                BalanceLabel.Text = $"Balance: ₹{summary.Balance:F2}";
             }
             catch (Exception ex)
             {
                 LogError(ex);
-                MessageBox.Show("Error loading transactions.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                AddLog($"❌ Error loading transactions: {ex.Message}");
+            }
+        }
+
+        private void AddLog(string message)
+        {
+            try
+            {
+                string logEntry = $"[{DateTime.Now:HH:mm:ss}] {message}\n";
+                LogTextBox.AppendText(logEntry);
+                LogTextBox.ScrollToEnd();
+            }
+            catch
+            {
+                // Silently fail if logging fails
             }
         }
 

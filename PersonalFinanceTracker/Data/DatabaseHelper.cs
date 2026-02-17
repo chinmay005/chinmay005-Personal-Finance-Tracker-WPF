@@ -38,7 +38,7 @@ namespace PersonalFinanceTracker.Data
         public DatabaseHelper()
         {
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabaseFileName);
-            _connectionString = $"Data Source={dbPath};Version=3;";
+            _connectionString = $"Data Source={dbPath}";
             InitializeDatabase();
         }
 
@@ -170,6 +170,52 @@ namespace PersonalFinanceTracker.Data
                 TotalExpenses = totalExpenses,
                 Balance = totalIncome - totalExpenses
             };
+        }
+
+        /// <summary>
+        /// Deletes a transaction from the database by ID
+        /// </summary>
+        public void DeleteTransaction(int id)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string deleteQuery = "DELETE FROM Transactions WHERE Id = @id";
+
+                using (SqliteCommand command = new SqliteCommand(deleteQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing transaction in the database
+        /// </summary>
+        public void UpdateTransaction(int id, DateTime date, string category, decimal amount, string notes)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string updateQuery = @"
+                    UPDATE Transactions 
+                    SET Date = @date, Category = @category, Amount = @amount, Notes = @notes 
+                    WHERE Id = @id";
+
+                using (SqliteCommand command = new SqliteCommand(updateQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("@date", date.ToString("yyyy-MM-dd"));
+                    command.Parameters.AddWithValue("@category", category);
+                    command.Parameters.AddWithValue("@amount", amount);
+                    command.Parameters.AddWithValue("@notes", notes ?? string.Empty);
+
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         /// <summary>
