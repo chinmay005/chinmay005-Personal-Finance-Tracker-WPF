@@ -1,6 +1,7 @@
 <Window x:Class="PersonalFinanceTracker.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.org/wpf"
         Title="Personal Finance Tracker" Height="800" Width="1200" 
         WindowStartupLocation="CenterScreen" Background="#F8F9FA"
         FontFamily="Segoe UI" FontSize="12">
@@ -284,6 +285,29 @@
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
                                 </DataGrid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Graphs Tab -->
+            <TabItem Header="📊 Graphs">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" Background="#F8F9FA">
+                        <!-- Monthly Income vs Expense Line Chart -->
+                        <Border Background="White" Margin="0,0,0,15" CornerRadius="8" BorderThickness="1" BorderBrush="#E0E0E0">
+                            <StackPanel Margin="20">
+                                <TextBlock Text="📈 Monthly Income vs Expenses Trend" FontSize="16" FontWeight="Bold" Foreground="#2196F3" Margin="0,0,0,15"/>
+                                <oxy:PlotView x:Name="IncomeExpenseChart" Height="300" Background="White"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Monthly Expense Distribution Pie Chart -->
+                        <Border Background="White" Margin="0,0,0,0" CornerRadius="8" BorderThickness="1" BorderBrush="#E0E0E0">
+                            <StackPanel Margin="20">
+                                <TextBlock Text="🥧 Monthly Expense Distribution by Category" FontSize="16" FontWeight="Bold" Foreground="#2196F3" Margin="0,0,0,15"/>
+                                <oxy:PlotView x:Name="ExpenseDistributionChart" Height="350" Background="White"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>

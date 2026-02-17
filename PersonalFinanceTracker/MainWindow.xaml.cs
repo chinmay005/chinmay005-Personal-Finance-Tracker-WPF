@@ -5,6 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using PersonalFinanceTracker.Data;
+using OxyPlot;
+using OxyPlot.Series;
+using OxyPlot.Axes;
 
 namespace PersonalFinanceTracker
 {
@@ -15,11 +18,17 @@ namespace PersonalFinanceTracker
         private int? editingTransactionId = null;
         private List<Transaction>? allTransactions = null;
 
+        public PlotModel IncomeExpenseModel { get; set; } = new PlotModel();
+        public PlotModel ExpenseDistributionModel { get; set; } = new PlotModel();
+
         public MainWindow()
         {
             InitializeComponent();
             try
             {
+                // Set DataContext for binding
+                this.DataContext = this;
+
                 // Initialize DatePicker
                 DateInput.SelectedDate = DateTime.Now;
                 
@@ -198,6 +207,14 @@ namespace PersonalFinanceTracker
                 IncomeLabel.Text = $"Income: ₹{summary.TotalIncome:F2}";
                 ExpenseLabel.Text = $"Expenses: ₹{summary.TotalExpenses:F2}";
                 BalanceLabel.Text = $"Balance: ₹{summary.Balance:F2}";
+
+                // Build charts
+                BuildIncomeExpenseChart();
+                BuildExpenseDistributionChart();
+
+                // Update DataContext for charts
+                IncomeExpenseChart.Model = IncomeExpenseModel;
+                ExpenseDistributionChart.Model = ExpenseDistributionModel;
             }
             catch (Exception ex)
             {
@@ -409,6 +426,224 @@ namespace PersonalFinanceTracker
             {
                 LogError(ex);
                 AddLog($"❌ Error applying filter: {ex.Message}");
+            }
+        }
+
+        private void BuildIncomeExpenseChart()
+        {
+            try
+            {
+                IncomeExpenseModel = new PlotModel
+                {
+                    Title = "Monthly Income vs Expenses",
+                    Background = OxyColor.FromArgb(255, 255, 255, 255),
+                    TitleFontSize = 14,
+                    TitleFontWeight = 700
+                };
+
+                if (allTransactions == null || allTransactions.Count == 0)
+                {
+                    IncomeExpenseModel.Annotations.Add(new OxyPlot.Annotations.TextAnnotation 
+                    { 
+                        Text = "No data available",
+                        TextPosition = new DataPoint(0.5, 0.5),
+                        FontSize = 12
+                    });
+                    return;
+                }
+
+                // Group by month and calculate income/expense
+                var monthlyData = allTransactions
+                    .GroupBy(t => new { t.Date.Year, t.Date.Month })
+                    .OrderBy(g => g.Key.Year)
+                    .ThenBy(g => g.Key.Month)
+                    .ToList();
+
+                var incomeValues = new List<DataPoint>();
+                var expenseValues = new List<DataPoint>();
+                var months = new List<string>();
+
+                int pointIndex = 0;
+                foreach (var monthGroup in monthlyData)
+                {
+                    var monthDate = new DateTime(monthGroup.Key.Year, monthGroup.Key.Month, 1);
+                    var monthStr = monthDate.ToString("MMM yyyy");
+                    months.Add(monthStr);
+
+                    var income = monthGroup
+                        .Where(t => db != null && db.IsIncomeCategory(t.Category))
+                        .Sum(t => (double)t.Amount);
+
+                    var expense = monthGroup
+                        .Where(t => db != null && !db.IsIncomeCategory(t.Category))
+                        .Sum(t => (double)t.Amount);
+
+                    incomeValues.Add(new DataPoint(pointIndex, income));
+                    expenseValues.Add(new DataPoint(pointIndex, expense));
+                    pointIndex++;
+                }
+
+                // Create line series for income
+                var incomeSeries = new LineSeries
+                {
+                    Title = "📈 Income",
+                    Color = OxyColor.FromArgb(255, 76, 175, 80),
+                    StrokeThickness = 2,
+                    MarkerType = MarkerType.Circle,
+                    MarkerSize = 4
+                };
+                foreach (var point in incomeValues)
+                    incomeSeries.Points.Add(point);
+
+                // Create line series for expenses
+                var expenseSeries = new LineSeries
+                {
+                    Title = "📉 Expenses",
+                    Color = OxyColor.FromArgb(255, 244, 67, 54),
+                    StrokeThickness = 2,
+                    MarkerType = MarkerType.Circle,
+                    MarkerSize = 4
+                };
+                foreach (var point in expenseValues)
+                    expenseSeries.Points.Add(point);
+
+                IncomeExpenseModel.Series.Add(incomeSeries);
+                IncomeExpenseModel.Series.Add(expenseSeries);
+
+                // Configure axes
+                var xAxis = new LinearAxis
+                {
+                    Position = AxisPosition.Bottom,
+                    Title = "Month",
+                    StringFormat = "0"
+                };
+                IncomeExpenseModel.Axes.Add(xAxis);
+
+                var yAxis = new LinearAxis
+                {
+                    Position = AxisPosition.Left,
+                    Title = "Amount (₹)",
+                    StringFormat = "0.00"
+                };
+                IncomeExpenseModel.Axes.Add(yAxis);
+
+                // Add legend
+                IncomeExpenseModel.IsLegendVisible = true;
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                AddLog($"❌ Error building income/expense chart: {ex.Message}");
+            }
+        }
+
+        private void BuildExpenseDistributionChart()
+        {
+            try
+            {
+                ExpenseDistributionModel = new PlotModel
+                {
+                    Title = "Monthly Expense Distribution by Category",
+                    Background = OxyColor.FromArgb(255, 255, 255, 255),
+                    TitleFontSize = 14,
+                    TitleFontWeight = 700
+                };
+
+                if (allTransactions == null || allTransactions.Count == 0)
+                {
+                    ExpenseDistributionModel.Annotations.Add(new OxyPlot.Annotations.TextAnnotation 
+                    { 
+                        Text = "No data available",
+                        TextPosition = new DataPoint(0.5, 0.5),
+                        FontSize = 12
+                    });
+                    return;
+                }
+
+                // Get current month or latest month with data
+                var now = DateTime.Now;
+                var currentMonthTransactions = allTransactions
+                    .Where(t => t.Date.Year == now.Year && t.Date.Month == now.Month)
+                    .ToList();
+
+                // If current month has no data, get the latest month with data
+                if (currentMonthTransactions.Count == 0)
+                {
+                    var latestMonth = allTransactions
+                        .OrderByDescending(t => t.Date)
+                        .FirstOrDefault();
+
+                    if (latestMonth != null)
+                    {
+                        currentMonthTransactions = allTransactions
+                            .Where(t => t.Date.Year == latestMonth.Date.Year && t.Date.Month == latestMonth.Date.Month)
+                            .ToList();
+                    }
+                }
+
+                // Group expenses by category
+                var expensesByCategory = currentMonthTransactions
+                    .Where(t => db != null && !db.IsIncomeCategory(t.Category))
+                    .GroupBy(t => t.Category)
+                    .OrderByDescending(g => g.Sum(t => t.Amount))
+                    .ToList();
+
+                if (expensesByCategory.Count == 0)
+                {
+                    ExpenseDistributionModel.Annotations.Add(new OxyPlot.Annotations.TextAnnotation 
+                    { 
+                        Text = "No expenses found",
+                        TextPosition = new DataPoint(0.5, 0.5),
+                        FontSize = 12
+                    });
+                    return;
+                }
+
+                // Create pie series
+                var pieSeries = new PieSeries
+                {
+                    InsideLabelPosition = 0.5,
+                    AngleSpan = 360,
+                    StartAngle = 0,
+                    InnerDiameter = 0,
+                    Stroke = OxyColors.White,
+                    StrokeThickness = 2
+                };
+
+                // Define colors for categories
+                var colors = new[]
+                {
+                    OxyColor.FromArgb(255, 244, 67, 54),    // Red
+                    OxyColor.FromArgb(255, 33, 150, 243),   // Blue
+                    OxyColor.FromArgb(255, 76, 175, 80),    // Green
+                    OxyColor.FromArgb(255, 255, 152, 0),    // Orange
+                    OxyColor.FromArgb(255, 156, 39, 176),   // Purple
+                    OxyColor.FromArgb(255, 0, 188, 212),    // Cyan
+                    OxyColor.FromArgb(255, 255, 87, 34),    // Deep Orange
+                    OxyColor.FromArgb(255, 63, 81, 181)     // Indigo
+                };
+
+                int colorIndex = 0;
+                foreach (var categoryGroup in expensesByCategory)
+                {
+                    var amount = categoryGroup.Sum(t => (double)t.Amount);
+                    pieSeries.Slices.Add(new PieSlice(
+                        $"{categoryGroup.Key}\n₹{amount:F0}",
+                        amount
+                    )
+                    {
+                        Fill = colors[colorIndex % colors.Length]
+                    });
+                    colorIndex++;
+                }
+
+                ExpenseDistributionModel.Series.Add(pieSeries);
+                ExpenseDistributionModel.IsLegendVisible = true;
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                AddLog($"❌ Error building expense distribution chart: {ex.Message}");
             }
         }
 
