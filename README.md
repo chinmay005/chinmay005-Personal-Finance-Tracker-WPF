@@ -1,18 +1,36 @@
 # Personal Finance Tracker
 
-A simple yet powerful WPF desktop application to track personal expenses and income using SQLite. Built with modern C# and .NET technologies.
+A powerful and intuitive WPF desktop application to manage personal expenses and income with advanced visualizations. Built with modern C# and .NET technologies, featuring SQLite database, interactive charts, and comprehensive search/filter capabilities.
 
 ## Features
 
-✨ **Core Functionality**
+✨ **Core Transaction Management**
 - ✅ Add income and expense transactions with ease
+- ✅ Edit and delete existing transactions with confirmation dialogs
 - ✅ View all transactions in a searchable, sortable data grid
 - ✅ Real-time summary dashboard (Total Income, Total Expenses, Balance)
-- ✅ **Dynamic category management** - Add, edit, and delete custom categories
 - ✅ Automatic categorization of transactions
 - ✅ Notes field for transaction details
-- ✅ Edit and delete existing transactions
-- ✅ Transaction activity log with timestamps
+- ✅ Transaction activity log with timestamps and action indicators
+
+📊 **Advanced Visualizations**
+- ✅ **Monthly Income vs Expenses Line Chart** - Track income and expense trends over time
+- ✅ **Monthly Expense Distribution Pie Chart** - Visualize expense breakdown by category
+- ✅ Color-coded charts for easy interpretation
+- ✅ Interactive chart legends and axis labels
+
+🔍 **Search & Filter**
+- ✅ **Keyword Search** - Filter transactions by category or notes
+- ✅ **Date Range Filters** - View transactions within specific date ranges
+- ✅ **Clear All Filters** - Quickly reset filters to view all transactions
+- ✅ Real-time filtered results display
+
+📁 **Category Management**
+- ✅ Dynamic category management - Add, edit, and delete custom categories
+- ✅ Income and Expense category separation
+- ✅ Category icons/emojis for better UX
+- ✅ Categories stored in database for persistence
+- ✅ Income/Expense dropdown with visual separator
 
 🛡️ **Reliability**
 - ✅ Input validation for all fields
@@ -21,18 +39,22 @@ A simple yet powerful WPF desktop application to track personal expenses and inc
 - ✅ SQLite database persistence
 
 💅 **User Interface**
-- ✅ Clean, modern WPF design
-- ✅ Alternating row colors in data grid for readability
-- ✅ Currency formatting for all monetary values
+- ✅ Tab-based layout (Transactions, Categories, Graphs)
+- ✅ Modern Material Design with professional styling
+- ✅ Blue borders for active tabs
+- ✅ Alternating row colors in data grids for readability
+- ✅ Currency formatting with rupee symbol (₹)
 - ✅ Color-coded summary (Income: Green, Expenses: Red, Balance: Blue)
-- ✅ Responsive form with quick-add transaction capability
+- ✅ Responsive design with proper spacing and visual hierarchy
+- ✅ Emoji support with proper Unicode encoding
 
 ## Tech Stack
 
 - **Language**: C# 12
 - **Framework**: .NET 10.0
 - **UI Framework**: WPF (Windows Presentation Foundation)
-- **Database**: SQLite with System.Data.SQLite
+- **Database**: SQLite with Microsoft.Data.Sqlite v8.0.0
+- **Charting**: OxyPlot.Wpf for professional data visualization
 - **IDE**: Visual Studio Code / Visual Studio
 
 ## Project Structure
@@ -81,49 +103,56 @@ PersonalFinanceTracker/
 
 ### Adding a Transaction
 
-1. Select a **date** using the date picker
-2. Choose a **category** from the dropdown (Income categories: Salary, Bonus, Investment, Gift, Other Income | Expense categories: Food, Rent, Transport, Entertainment, Utilities, Healthcare, Other)
-3. Enter the **amount** (positive number only)
-4. *(Optional)* Add **notes** for transaction details
-5. Click **"Add Transaction"** button
+1. Go to the **💳 Transactions** tab
+2. Select a **date** using the date picker
+3. Choose a **category** from the dropdown
+   - **Income**: Salary, Bonus, Investment, Gift, Other Income
+   - **Expense**: Food, Rent, Transport, Entertainment, Utilities, Healthcare, Other
+4. Enter the **amount** (positive number only)
+5. *(Optional)* Add **notes** for transaction details
+6. Click **"➕ Add Transaction"** button
 
-### Viewing Transactions
+### Searching & Filtering Transactions
 
-- All transactions are displayed in the data grid below the form
-- Transactions are sorted by date (newest first)
-- The grid shows: ID, Date, Category, Amount, Notes
+1. Go to the **💳 Transactions** tab
+2. Enter **keyword** to search by category or notes
+3. Select **From Date** to filter transactions from a specific date
+4. Select **To Date** to filter transactions until a specific date
+5. Click **"🔎 Filter"** to apply filters
+6. Click **"✖️ Clear"** to reset all filters and view all transactions
 
-### Summary Dashboard
+### Viewing Transaction Analytics
 
-The bottom section displays:
-- **Total Income**: Sum of all income transactions
-- **Total Expenses**: Sum of all expense transactions
-- **Balance**: Income minus Expenses
+1. Go to the **📊 Graphs** tab
+2. View **Monthly Income vs Expenses Trend** line chart:
+   - Green line represents income
+   - Red line represents expenses
+   - Hover over data points for exact values
+3. View **Monthly Expense Distribution** pie chart:
+   - Shows expense breakdown by category for current month
+   - Click on slices to see category names and amounts
 
 ### Managing Categories
 
-1. **Add a New Category**
-   - Go to the "Category Management" section
-   - Enter the category **name** (e.g., "Shopping")
-   - Select the **type**: Income or Expense
+1. Go to the **🏷️ Categories** tab
+2. **Add a New Category**
+   - Enter category **name** (e.g., "Shopping")
+   - Select **type**: Income or Expense
    - *(Optional)* Add an **icon** (emoji, e.g., 🛍️)
-   - Click **"Add Category"** button
-
-2. **View Existing Categories**
-   - All categories are displayed in the categories data grid
+   - Click **"➕ Add Category"** button
+3. **View Existing Categories**
+   - All categories are displayed in the data grid
    - Shows: ID, Icon, Name, Type, Actions
+4. **Edit or Delete Categories**
+   - Click **"✏️ Edit"** to edit a category (feature coming soon)
+   - Click **"🗑️ Delete"** to remove a category with confirmation
 
-3. **Delete a Category**
-   - Click the **"Delete"** button next to any category
-   - Confirm the deletion in the popup dialog
-   - Category will be removed from the database
+### Summary Dashboard
 
-### Transaction Log
-
-All actions (add, edit, delete transactions) are logged in the **Transaction Log** section at the bottom with:
-- Timestamp
-- Action type with emoji indicator (✅ add, ✏️ edit, 🗑️ delete)
-- Transaction details
+The bottom section displays real-time summaries:
+- **💚 Total Income**: Sum of all income transactions (Green)
+- **❤️ Total Expenses**: Sum of all expense transactions (Red)
+- **💙 Balance**: Income minus Expenses (Blue)
 
 ## Key Features Explained
 
@@ -183,16 +212,17 @@ CREATE TABLE Categories (
 
 - [x] Edit and delete transactions
 - [x] Category management and custom categories
-- [ ] Charts and graphs for expense visualization (Pie chart, Line chart)
-- [ ] Search and filter transactions by keyword
-- [ ] Date range filters
-- [ ] Monthly/yearly summaries
+- [x] Charts and graphs for expense visualization (Line chart, Pie chart)
+- [x] Search and filter transactions by keyword
+- [x] Date range filters
+- [ ] Monthly/yearly summaries with detailed reports
 - [ ] Budget planning and alerts
 - [ ] Data export (CSV, PDF)
-- [ ] Multi-user support
+- [ ] Multi-user support with authentication
 - [ ] Cloud synchronization
 - [ ] Unit tests for DatabaseHelper
-- [ ] Professional license file
+- [ ] Performance optimizations for large datasets
+- [ ] Dark mode theme
 
 ## License
 
@@ -215,22 +245,47 @@ If you encounter any issues, please:
 
 ## Changelog
 
-### Version 1.1.0 (Current)
-- ✨ **New**: Dynamic category management (Add, Edit, Delete custom categories)
-- ✨ **New**: Categories stored in separate database table for flexibility
-- ✨ **New**: Edit and delete existing transactions with UI buttons
-- ✨ **New**: Transaction activity log with timestamps and action indicators
-- ✨ **New**: Category icons/emojis for better UX
-- 🐛 **Fixed**: Category loading from database instead of hardcoded list
-- 💅 **Improved**: Updated UI with category management section
-- 💱 **Changed**: Currency symbol updated to rupee (₹)
+### Version 1.0.0 (Release) 🎉
+**Release Date**: February 17, 2026
 
-### Version 1.0.0
-- Initial release
+✨ **New Features**
+- ✨ **Graphs Tab** with interactive charts:
+  - 📈 Monthly Income vs Expenses Line Chart - Track financial trends over time
+  - 🥧 Monthly Expense Distribution Pie Chart - Visualize spending by category
+- ✨ **Advanced Search & Filter**:
+  - Keyword-based search (filter by category or notes)
+  - Date range filters (From Date and To Date)
+  - Clear filters button for quick reset
+- ✨ **Dynamic Category Management**:
+  - Add, edit, and delete custom categories
+  - Category icons/emojis for better identification
+  - Income/Expense category separation with visual separator in dropdown
+- ✨ **Transaction Editing** - Full edit functionality for existing transactions
+- ✨ **Professional Charting** - OxyPlot.Wpf integration for data visualization
+- ✨ **Enhanced UI**:
+  - Tab-based layout (Transactions, Categories, Graphs)
+  - Material Design styling with blue active tab borders
+  - Improved visual hierarchy and spacing
+  - Emoji support with proper Unicode encoding
+
+🐛 **Bug Fixes**
+- Fixed emoji corruption issues with proper Unicode escape sequences
+- Resolved tab styling and visibility issues
+- Fixed category dropdown display issues
+
+💅 **Improvements**
+- Responsive UI with Material Design colors
+- Better error messages and validation feedback
+- Comprehensive activity logging with timestamps
+- Clean, intuitive user interface
+- Professional styling across all components
+
+### Version 0.1.0 (Initial Release)
+- Initial project setup
 - Core transaction management functionality
 - SQLite database integration
-- Input validation and error handling
-- Modern UI with WPF
+- Basic input validation and error handling
+- WPF UI with simple layout
 
 ---
 
