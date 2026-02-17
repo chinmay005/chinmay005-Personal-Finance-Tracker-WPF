@@ -8,8 +8,11 @@ A simple yet powerful WPF desktop application to track personal expenses and inc
 - ✅ Add income and expense transactions with ease
 - ✅ View all transactions in a searchable, sortable data grid
 - ✅ Real-time summary dashboard (Total Income, Total Expenses, Balance)
+- ✅ **Dynamic category management** - Add, edit, and delete custom categories
 - ✅ Automatic categorization of transactions
 - ✅ Notes field for transaction details
+- ✅ Edit and delete existing transactions
+- ✅ Transaction activity log with timestamps
 
 🛡️ **Reliability**
 - ✅ Input validation for all fields
@@ -97,6 +100,31 @@ The bottom section displays:
 - **Total Expenses**: Sum of all expense transactions
 - **Balance**: Income minus Expenses
 
+### Managing Categories
+
+1. **Add a New Category**
+   - Go to the "Category Management" section
+   - Enter the category **name** (e.g., "Shopping")
+   - Select the **type**: Income or Expense
+   - *(Optional)* Add an **icon** (emoji, e.g., 🛍️)
+   - Click **"Add Category"** button
+
+2. **View Existing Categories**
+   - All categories are displayed in the categories data grid
+   - Shows: ID, Icon, Name, Type, Actions
+
+3. **Delete a Category**
+   - Click the **"Delete"** button next to any category
+   - Confirm the deletion in the popup dialog
+   - Category will be removed from the database
+
+### Transaction Log
+
+All actions (add, edit, delete transactions) are logged in the **Transaction Log** section at the bottom with:
+- Timestamp
+- Action type with emoji indicator (✅ add, ✏️ edit, 🗑️ delete)
+- Transaction details
+
 ## Key Features Explained
 
 ### Input Validation
@@ -129,20 +157,42 @@ CREATE TABLE Transactions (
 )
 ```
 
+### Categories Table
+```sql
+CREATE TABLE Categories (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL UNIQUE,
+    Type TEXT NOT NULL,           -- "Income" or "Expense"
+    Icon TEXT                     -- Emoji or icon representation
+)
+```
+
+**Default Categories:**
+- **Income**: Salary 💼, Bonus 🎁, Investment 📈, Gift 🎉, Other Income 💰
+- **Expense**: Food 🍔, Rent 🏠, Transport 🚗, Entertainment 🎬, Utilities 💡, Healthcare 🏥, Other 📦
+
 ## Screenshots
 
-*(Coming soon - UI polishing in progress)*
+*(To be added - Take screenshots using Windows Snipping Tool or ShareX and save to `docs/screenshots/`)*
+
+- Main Window with Transaction List
+- Category Management Section
+- Transaction Log and Summary Dashboard
 
 ## Future Enhancements
 
-- [ ] Edit and delete transactions
-- [ ] Category management and custom categories
-- [ ] Charts and graphs for expense visualization
+- [x] Edit and delete transactions
+- [x] Category management and custom categories
+- [ ] Charts and graphs for expense visualization (Pie chart, Line chart)
+- [ ] Search and filter transactions by keyword
+- [ ] Date range filters
 - [ ] Monthly/yearly summaries
 - [ ] Budget planning and alerts
 - [ ] Data export (CSV, PDF)
 - [ ] Multi-user support
 - [ ] Cloud synchronization
+- [ ] Unit tests for DatabaseHelper
+- [ ] Professional license file
 
 ## License
 
@@ -165,7 +215,17 @@ If you encounter any issues, please:
 
 ## Changelog
 
-### Version 1.0.0 (Current)
+### Version 1.1.0 (Current)
+- ✨ **New**: Dynamic category management (Add, Edit, Delete custom categories)
+- ✨ **New**: Categories stored in separate database table for flexibility
+- ✨ **New**: Edit and delete existing transactions with UI buttons
+- ✨ **New**: Transaction activity log with timestamps and action indicators
+- ✨ **New**: Category icons/emojis for better UX
+- 🐛 **Fixed**: Category loading from database instead of hardcoded list
+- 💅 **Improved**: Updated UI with category management section
+- 💱 **Changed**: Currency symbol updated to rupee (₹)
+
+### Version 1.0.0
 - Initial release
 - Core transaction management functionality
 - SQLite database integration
